@@ -11,38 +11,39 @@ class Game(object):
         self.player1 = p1   # player 1
         self.player2 = p2   # player 2
         self.board = Board(board_size)  # playboard
+        self.actual_player = self.player1
 
     """
     ------------- GAME SHIT --------------------
     """
-    def player_turn(self, actual_player):
+    def player_turn(self):
         """execute player turn"""
-        print("\nPlayer: {}    Score: {}".format(actual_player.name, actual_player.score))  # prints game info, whose turn and score
+        print("\nPlayer: {}    Score: {}".format(self.actual_player.name, self.actual_player.score))  # prints game info, whose turn and score
         self.board.print_board()    # print board_sizes
         coords = self.get_coords()  # get coords from player
-        self.board.place_symbol(coords[1], coords[0], actual_player.symbol)    # place player symbol on board
+        self.board.place_symbol(coords[1], coords[0], self.actual_player.symbol)    # place player symbol on board
 
     def play_round(self):
         """plays one round"""
-        actual_player = self.set_first_player()   # set starting player
+        self.set_first_player()   # set starting player
         round_end = False   # end cause won or no empty slots == draw
         round_won = False   # round won by player
         cant_play = False   # no empty positions
         turn = 1  # counts turns
         while not round_end:
-            self.player_turn(actual_player) # selects starting player
+            self.player_turn() # selects starting player
             if turn >= self.board.win_condition:    # only checks after some turns played
-                round_won = self.board.check_win(actual_player)
+                round_won = self.board.check_win(self.actual_player)
                 cant_play = turn == self.board.size ** 2 # if no. of turns == no. of positions
                 round_end =  round_won or cant_play # ends if round is won/no empty positions
             if not round_end: # if round not finnished
                 turn += 1   # iterate turns
-                actual_player = self.change_players(actual_player)    # change active player
+                self.change_players()    # change active player
 
         if round_won:   # if round won by one of the players
-            print("\n{} is a proper cunt!\n".format(actual_player.name))
-            actual_player.add_score()    # adds score to winner
-            self.set_next_first_player(actual_player)    # next round starting player
+            print("\n{} is a proper cunt!\n".format(self.actual_player.name))
+            self.actual_player.add_score()    # adds score to winner
+            self.set_next_first_player()    # next round starting player
         else:  # if not won, it's a draw
             print("\nIT'S A DRAW!")
         self.board.print_board()    # print bord whe ngame endds
@@ -80,28 +81,28 @@ class Game(object):
     def set_first_player(self):
         """sets the first player based on od previous round winner"""
         if self.player2.won_previous:
-            return self.player2
-        return self.player1
+            self.actual_player = self.player2
+        else: self.actual_player = self.player1
 
-    def set_next_first_player(self, actual_player):
+    def set_next_first_player(self):
         """sets winners won_previous parameter ot true so he will star the next round"""
-        if actual_player == self.player1:
+        if self.actual_player == self.player1:
             self.player1.won_previous = True
             self.player2.won_previous = False
         else:
             self.player2.won_previous = True
             self.player1.won_previous = False
 
-    def change_players(self, actual_player):
-        """chenges players"""
-        if actual_player == self.player1:
-            return self.player2
+    def change_players(self):
+        """changes players"""
+        if self.actual_player == self.player1:
+            self.actual_player = self.player2
         else:
-            return self.player1
+            self.actual_player = self.player1
 
     def play_again(self):
         """ask if player wants another round"""
-        play_again = input("Do you wish to play again??? (yes/no)")
+        play_again = input("Do you wish to play again??? (yes/no): ")
         while True:
             if play_again in ('Yes', 'yes', 'y', 'YES', 'yep', 'yarp', 'aye'):
                 return True
@@ -109,7 +110,7 @@ class Game(object):
                 return False
             else:
                 print('God dammit Sir, can you no write??')
-            play_again = input("Play again??? (It's simple, just type yes/no)")
+            play_again = input("Play again??? (It's simple, just type yes/no): ")
 
     def play(self):
         """starts a game"""
@@ -121,9 +122,9 @@ class Game(object):
                 self.play_round()
                 wanna_play = self.play_again()
                 self.board.reset()
+        print('Farewell!')
         sys.exit()
         time.sleep(3)
-        print('Exitting...')
 
     def uber_check_win(self):
         """ checks the total winner(rounds won) """
@@ -174,7 +175,9 @@ class Board(object):
         """check if round was won"""
         for i in range(self.size):
             for j in range(self.size):
-                if self.check_row(j, i, player.symbol) or self.check_column(j, i, player.symbol) or self.check_diagonaly(j, i, player.symbol):
+                if self.check_row(j, i, player.symbol) or \
+                   self.check_column(j, i, player.symbol) or \
+                   self.check_diagonaly(j, i, player.symbol):
                     return True
         return False
 
@@ -251,3 +254,16 @@ class Player(object):
 
     def ai_play(self):
         pass
+
+
+# TODO: AI, gegnerate name
+# TODO: errors, exceptions
+# TODO: settings
+# TODO: bigger plan
+
+
+p1 = Player("Alojz",'X ', False)
+p2 = Player("Kakac", 'O ', False)
+
+game = Game(p1, p2, 3)
+game.play()
