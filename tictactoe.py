@@ -11,17 +11,17 @@ class Game(object):
         self.player1 = p1   # player 1
         self.player2 = p2   # player 2
         self.board = Board(board_size)  # playboard
-        self.actual_player = self.player1
+        self.current_player = self.player1
 
     """
     ------------- GAME SHIT --------------------
     """
     def player_turn(self):
         """execute player turn"""
-        print("\nPlayer: {}    Score: {}".format(self.actual_player.name, self.actual_player.score))  # prints game info, whose turn and score
+        print("\nPlayer: {}    Score: {}".format(self.current_player.name, self.current_player.score))  # prints game info, whose turn and score
         self.board.print_board()    # print board_sizes
         coords = self.get_coords()  # get coords from player
-        self.board.place_symbol(coords[1], coords[0], self.actual_player.symbol)    # place player symbol on board
+        self.board.place_symbol(coords[1], coords[0], self.current_player.symbol)    # place player symbol on board
 
     def play_round(self):
         """plays one round"""
@@ -33,7 +33,7 @@ class Game(object):
         while not round_end:
             self.player_turn() # selects starting player
             if turn >= self.board.win_condition:    # only checks after some turns played
-                round_won = self.board.check_win(self.actual_player)
+                round_won = self.board.check_win(self.current_player)
                 cant_play = turn == self.board.size ** 2 # if no. of turns == no. of positions
                 round_end =  round_won or cant_play # ends if round is won/no empty positions
             if not round_end: # if round not finnished
@@ -41,8 +41,8 @@ class Game(object):
                 self.change_players()    # change active player
 
         if round_won:   # if round won by one of the players
-            print("\n{} is a proper cunt!\n".format(self.actual_player.name))
-            self.actual_player.add_score()    # adds score to winner
+            print("\n{} is a proper cunt!\n".format(self.current_player.name))
+            self.current_player.add_score()    # adds score to winner
             self.set_next_first_player()    # next round starting player
         else:  # if not won, it's a draw
             print("\nIT'S A DRAW!")
@@ -81,12 +81,12 @@ class Game(object):
     def set_first_player(self):
         """sets the first player based on od previous round winner"""
         if self.player2.won_previous:
-            self.actual_player = self.player2
-        else: self.actual_player = self.player1
+            self.current_player = self.player2
+        else: self.current_player = self.player1
 
     def set_next_first_player(self):
         """sets winners won_previous parameter ot true so he will star the next round"""
-        if self.actual_player == self.player1:
+        if self.current_player == self.player1:
             self.player1.won_previous = True
             self.player2.won_previous = False
         else:
@@ -95,10 +95,10 @@ class Game(object):
 
     def change_players(self):
         """changes players"""
-        if self.actual_player == self.player1:
-            self.actual_player = self.player2
+        if self.current_player == self.player1:
+            self.current_player = self.player2
         else:
-            self.actual_player = self.player1
+            self.current_player = self.player1
 
     def play_again(self):
         """ask if player wants another round"""
@@ -257,6 +257,8 @@ class Player(object):
 
 
 # TODO: AI, gegnerate name
+# TODO: boards 0/1
+# TODO: board represented binary
 # TODO: errors, exceptions
 # TODO: settings
 # TODO: bigger plan
